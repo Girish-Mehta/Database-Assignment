@@ -115,11 +115,54 @@ public class DataBase{
             }
         }
 
-        System.out.print("\nLocations to read: ");
-        for(int target:targetField)
-            System.out.print(target+" ");
+        for(String condition: query.getConditions()){
+          if(condition.contains("=")){
+            pos = condition.indexOf("=")-1  ;
+            String parameter = condition.substring(0, pos);
+            String value = condition.substring(pos+3, condition.length());
+            pos = 0;
+            for(String head: this.headers){
+              pos++;
+              if(head.equals(parameter)){
+                loc = pos-1;
+                break;
+              }
+            }
+            BufferedReader br = null;
+            String row = "";
 
+            try {
+                br = new BufferedReader(new FileReader(csvFile));
+                while ((row = br.readLine()) != null) {
+                   this.col = row.split(",");
+                   pos = 0;
+                   for(String val: col){
+                     if(pos == loc){
+                         if(val.equals(value)){
+                           System.out.println(row+"\n");
+                           pos = 0;
+                           continue;
+                         }
+                     } else{
+                       pos++;
+                     }
+                   }
+                }
 
-
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (br != null) {
+                    try {
+                        br.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+          }
+        }
     }
 }

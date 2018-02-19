@@ -2,9 +2,9 @@ import java.util.regex.*;
 
 public class QueryParameter{
     private String[] base;
-	private String[] conditions;
-	private String[] fields;
-    private String[] filter; 
+	  private String[] conditions;
+	  private String[] fields;
+    private String[] filter;
     private String[] functions;
     private String[] groups;
     private String[] orders;
@@ -37,25 +37,26 @@ public class QueryParameter{
     }
 
 
-	public String[] getConditions() {	
+	public String[] getConditions() {
 		int i = 0;
-        String sub = query.substring(query.toLowerCase().indexOf("where")+6,query.length());
+    String sub = query.substring(query.toLowerCase().indexOf("where")+6,query.length());
 		Pattern pattern = Pattern.compile("(\\w+[ ]?)(<>|>=|<=|>|<|=|like|in|not like|not in|(between[ ]?\\d[ ]?and\\d))([ ]?['(]?\\w+[')]?)");
 		Matcher matcher = pattern.matcher(sub);
-		System.out.println("\nConditions:");
+		// System.out.println("\nConditions:");
 		while (matcher.find())
 		{
-			this.conditions[i++] = matcher.group();
+      this.conditions = matcher.group().split(",");
+			// this.conditions[i++] = matcher.group();
 		}
 		return this.conditions;
-	}    
+	}
 
     public String[] getLogicalOp(){
         StringBuilder ops = new StringBuilder();
         if(query.contains("and")){
             ops.append("and\n");
-        } 
-        
+        }
+
         if(query.contains("or")){
             ops.append("or\n");
         }
@@ -88,7 +89,7 @@ public class QueryParameter{
                     String[] ch = s.split(" ");
                     if(ch[1].toLowerCase().contains("asc") || ch[1].toLowerCase().contains("desc"))
                         string.append(ch[0]+"\n");
-                    else 
+                    else
                         string.append(ch[1]+"\n");
                 }
             }
@@ -112,7 +113,7 @@ public class QueryParameter{
                     String[] ch = s.split(" ");
                     if(ch[1].contains(" "))
                         string.append(ch[0]+"\n");
-                    else 
+                    else
                         string.append(ch[1]+"\n");
                 }
             }
@@ -203,6 +204,6 @@ public class QueryParameter{
 
         this.functions = subString.toString().split("\n");
         return this.functions;
-    }    
+    }
 
 }
