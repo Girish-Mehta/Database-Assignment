@@ -1,8 +1,7 @@
 package com.dbengine;
 
 import java.util.Scanner;
-import DataBase;
-import QueryParameter;
+import com.dbengine.*;
 
 class MainProgram{
     public static void main(String[] args){
