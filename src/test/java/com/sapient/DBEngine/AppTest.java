@@ -20,6 +20,7 @@ public class AppTest
         super( testName );
     }
 
+    
     /**
      * @return the suite of tests being tested
      */
@@ -28,6 +29,7 @@ public class AppTest
         return new TestSuite( AppTest.class );
     }
 
+    
     /**
      * Rigourous Test :-)
      */

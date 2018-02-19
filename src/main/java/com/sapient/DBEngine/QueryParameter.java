@@ -59,11 +59,12 @@ public class QueryParameter {
 
 	public ArrayList<String> getConditions() {
 		String sub = query.substring(query.toLowerCase().indexOf("where")+6,query.length());
-		Pattern pattern = Pattern.compile("(\\w+[ ]?)(<>|>=|<=|>|<|=|like|in|not like|not in|(between[ ]?\\d[ ]?and\\d))([ ]?['(]?\\w+[')]?)");
+		Pattern pattern = Pattern.compile("(\\w+[ ]?)(<>|>=|<=|>|<|=|like|in|not like|not in|(between?\\d[ ]?and\\d))([ ]?['(]?\\w+[')]?)");
 		Matcher matcher = pattern.matcher(sub);
 		while (matcher.find())
 		{
 			this.conditions.add(matcher.group());
+			System.out.println("Here:"+matcher.group());
 		}
 		return this.conditions;
 	}
@@ -229,4 +230,5 @@ public class QueryParameter {
 
        return this.functions;
     }
+       
 }

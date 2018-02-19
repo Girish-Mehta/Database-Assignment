@@ -1,8 +1,10 @@
 package com.sapient.DBEngine;
 
 import java.io.BufferedReader;
+
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -102,11 +104,24 @@ public class DataBase {
 
     public void executeQuery(QueryParameter query){
         ArrayList<String> fields = new ArrayList<String>();
+        FileWriter fw = null;
+        // declaring two variables for storing locations and positions of fields in csv file
         int loc = 0;
         int pos = 0;
-        System.out.println("\nYour query: "+query.getQuery());
         fields = query.getFields();
+        
+        
+        try{    
+            fw=new FileWriter("temp.csv");
+//            fw.write("Welcome to javaTpoint.");    
+//            fw.close();    
+           }catch(Exception e){
+        	   System.out.println(e);
+           }    
+        
+        // store the positions of fields that user wants from select query
         int[] targetField = new int[fields.size()];
+        // match required fields with header from csv to get location of each field
         for(String field:fields){
             pos = 0;
             for(String header:this.headers){
@@ -116,54 +131,293 @@ public class DataBase {
             }
         }
 
+        // get conditions in query
         for(String condition: query.getConditions()){
-          if(condition.contains("=")){
-            pos = condition.indexOf("=")-1  ;
-            String parameter = condition.substring(0, pos);
-            String value = condition.substring(pos+3, condition.length());
-            pos = 0;
-            for(String head: this.headers){
-              pos++;
-              if(head.equals(parameter)){
-                loc = pos-1;
-                break;
-              }
-            }
-            BufferedReader br = null;
-            String row = "";
+        	
+        	
+        	
+        	// check if condition is checking for less than or equal to
+        	if(condition.contains("<=")){
+        		pos = condition.indexOf("<=")-1;
+        		
+        		// get the field parameter to compare from query
+        		String[] con = condition.split(" <= ");
+        		String parameter = con[0];
+        		int value = Integer.parseInt(con[1]);
 
-            try {
-                br = new BufferedReader(new FileReader(csvFile));
-                while ((row = br.readLine()) != null) {
-                   this.col = row.split(",");
-                   pos = 0;
-                   for(String val: col){
-                     if(pos == loc){
-                         if(val.equals(value)){
-                           System.out.println(row+"\n");
-                           pos = 0;
-                           continue;
-                         }
-                     } else{
-                       pos++;
-                     }
-                   }
-                }
+        		pos = 0;
+        		for(String head: this.headers){
+        			pos++;
+        			if(head.equals(parameter)){
+        					loc = pos-1;
+        					break;
+        			}
+        		}
+	            BufferedReader br = null;
+	            String row = "";
+	
+	            try {
+	                br = new BufferedReader(new FileReader(csvFile));
+	                while ((row = br.readLine()) != null) {
+	                   this.col = row.split(",");
+	                   pos = 0;
+	                   for(String val: col){
+	                     if(pos == loc){
+	                    	 try {
+		                    	 if(Integer.parseInt(val) <= value){
+				                       fw.write(row+"\n");
+		 	                           System.out.println(row+"\n");
+			                           pos = 0;
+			                     }	                    		 
+	                    	 }
+	                    	 catch(Exception e) {
+	                        	 continue;
+	                         }
+                           break;
+	                     } else{
+	                       pos++;
+	                     }
+	                   }
+	                }	
+	            } catch (FileNotFoundException e) {
+	                e.printStackTrace();
+	            } catch (IOException e) {
+	                e.printStackTrace();
+	            } finally {
+	                if (br != null) {
+	                    try {
+	                        br.close();
+	                    } catch (IOException e) {
+	                        e.printStackTrace();
+	                    }
+	                }
+	            }
+        	}
+        	// check if condition is checking for greater than or equal to
+        	else if(condition.contains(">=")){
+        		pos = condition.indexOf(">=")-1;
+        		
+        		// get the field parameter to compare from query
+        		String[] con = condition.split(" >= ");
+        		String parameter = con[0];
+        		int value = Integer.parseInt(con[1]);
 
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (br != null) {
-                    try {
-                        br.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-          }
+        		pos = 0;
+        		for(String head: this.headers){
+        			pos++;
+        			if(head.equals(parameter)){
+        					loc = pos-1;
+        					break;
+        			}
+        		}
+	            BufferedReader br = null;
+	            String row = "";
+	
+	            try {
+	                br = new BufferedReader(new FileReader(csvFile));
+	                while ((row = br.readLine()) != null) {
+	                   this.col = row.split(",");
+	                   pos = 0;
+	                   for(String val: col){
+	                     if(pos == loc){
+	                    	 try {
+	                    		 if(Integer.parseInt(val) >= value){
+	  		                       fw.write(row+"\n");
+	   	                           System.out.println(row+"\n");
+	  	                           pos = 0;
+	  	                         }	 
+	                    	 }
+	                    	 catch(Exception e) {
+	                    		 continue;
+	                    	 }
+	                         
+                           break;
+	                     } else{
+	                       pos++;
+	                     }
+	                   }
+	                }	
+	            } catch (FileNotFoundException e) {
+	                e.printStackTrace();
+	            } catch (IOException e) {
+	                e.printStackTrace();
+	            } finally {
+	                if (br != null) {
+	                    try {
+	                        br.close();
+	                    } catch (IOException e) {
+	                        e.printStackTrace();
+	                    }
+	                }
+	            }
+        	}
+        	// check if condition is checking for equality
+        	else if(condition.contains("=")){
+        		pos = condition.indexOf("=")-1;
+        		
+        		// get the field parameter to compare from query
+        		String[] con = condition.split(" = ");
+        		String parameter = con[0];
+        		String value = con[1];
+
+        		pos = 0;
+        		for(String head: this.headers){
+        			pos++;
+        			if(head.equals(parameter)){
+        					loc = pos-1;
+        					break;
+        			}
+        		}
+	            BufferedReader br = null;
+	            String row = "";
+	
+	            try {
+	                br = new BufferedReader(new FileReader(csvFile));
+	                while ((row = br.readLine()) != null) {
+	                   this.col = row.split(",");
+	                   pos = 0;
+	                   for(String val: col){
+	                     if(pos == loc){
+	                         if(val.equals(value)){
+	                           fw.write(row+"\n");
+	                           System.out.println(row+"\n");
+	                           pos = 0;
+	                         }
+                           break;
+	                     } else{
+	                       pos++;
+	                     }
+	                   }
+	                }	
+	            } catch (FileNotFoundException e) {
+	                e.printStackTrace();
+	            } catch (IOException e) {
+	                e.printStackTrace();
+	            } finally {
+	                if (br != null) {
+	                    try {
+	                        br.close();
+	                    } catch (IOException e) {
+	                        e.printStackTrace();
+	                    }
+	                }
+	            }
+        	}
+        	// check if condition is checking for less than
+        	else if(condition.contains("<")){
+        		pos = condition.indexOf("<")-1;
+        		
+        		// get the field parameter to compare from query
+        		String[] con = condition.split(" < ");
+        		String parameter = con[0];
+        		int value = Integer.parseInt(con[1]);
+
+        		pos = 0;
+        		for(String head: this.headers){
+        			pos++;
+        			if(head.equals(parameter)){
+        					loc = pos-1;
+        					break;
+        			}
+        		}
+	            BufferedReader br = null;
+	            String row = "";
+	
+	            try {
+	                br = new BufferedReader(new FileReader(csvFile));
+	                while ((row = br.readLine()) != null) {
+	                   this.col = row.split(",");
+	                   pos = 0;
+	                   for(String val: col){
+	                     if(pos == loc){
+	                    	 try {
+		                         if(Integer.parseInt(val) < value){
+				                       fw.write(row+"\n");
+		                        	   System.out.println(row+"\n");
+			                           pos = 0;
+			                         } 
+	                    	 }
+	                    	 catch(Exception e) {
+	                    		 continue;
+	                    	 }
+                           break;
+	                     } else{
+	                       pos++;
+	                     }
+	                   }
+	                }	
+	            } catch (FileNotFoundException e) {
+	                e.printStackTrace();
+	            } catch (IOException e) {
+	                e.printStackTrace();
+	            } finally {
+	                if (br != null) {
+	                    try {
+	                        br.close();
+	                    } catch (IOException e) {
+	                        e.printStackTrace();
+	                    }
+	                }
+	            }
+        	}
+        	// check if condition is checking for greater than
+        	else if(condition.contains(">")){
+        		pos = condition.indexOf(">")-1;
+        		
+        		// get the field parameter to compare from query
+        		String[] con = condition.split(" > ");
+        		String parameter = con[0];
+        		int value = Integer.parseInt(con[1]);
+
+        		pos = 0;
+        		for(String head: this.headers){
+        			pos++;
+        			if(head.equals(parameter)){
+        					loc = pos-1;
+        					break;
+        			}
+        		}
+	            BufferedReader br = null;
+	            String row = "";
+	
+	            try {
+	                br = new BufferedReader(new FileReader(csvFile));
+	                while ((row = br.readLine()) != null) {
+	                   this.col = row.split(",");
+	                   pos = 0;
+	                   for(String val: col){
+	                     if(pos == loc){
+	                    	 try {
+		                         if(Integer.parseInt(val) > value){
+				                       fw.write(row+"\n");
+		 	                           System.out.println(row+"\n");
+			                           pos = 0;	                    		 
+		                         }
+	                    	 }
+	                         catch(Exception e) {
+	                        	 continue;
+	                         }
+                           break;
+	                     } else{
+	                       pos++;
+	                     }
+	                   }
+	                }	
+	            } catch (FileNotFoundException e) {
+	                e.printStackTrace();
+	            } catch (IOException e) {
+	                e.printStackTrace();
+	            } finally {
+	                if (br != null) {
+	                    try {
+	                        br.close();
+	                    } catch (IOException e) {
+	                        e.printStackTrace();
+	                    }
+	                }
+	            }
+        	}       	        	
+        	
         }
     }
 }
