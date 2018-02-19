@@ -19,7 +19,7 @@ public class DataBase{
     }
 
     public void getHeaderType(){
-        System.out.println("\n**************getting type of header");
+        System.out.println("\nGetting type of header\n\n");
         BufferedReader br = null;
         String row = "";
         boolean numeric;
@@ -71,7 +71,7 @@ public class DataBase{
 
 
     public void readFileHeader(){
-        System.out.println("\n**************reading header of file");
+        // System.out.println("\n**************reading header of file");
         BufferedReader br = null;
         String row = "";
 
@@ -82,9 +82,9 @@ public class DataBase{
                break;
             }
 
-            for(String sub: headers){
-                System.out.println(sub);
-            }
+            // for(String sub: headers){
+            //     System.out.println(sub);
+            // }
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
