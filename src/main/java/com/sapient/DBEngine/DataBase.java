@@ -6,6 +6,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class DataBase {
@@ -113,7 +117,6 @@ public class DataBase {
         
         try{    
             fw=new FileWriter("temp.csv");
-//            fw.write("Welcome to javaTpoint.");    
 //            fw.close();    
            }catch(Exception e){
         	   System.out.println(e);
@@ -419,5 +422,14 @@ public class DataBase {
         	}       	        	
         	
         }
+        try {
+        	//delete temp file
+        	Path path = Paths.get("temp.csv");
+        	Files.delete(path);
+        	// close resources
+        	fw.close();
+		} catch (IOException e) {
+			System.out.println(e);
+		}    
     }
 }
