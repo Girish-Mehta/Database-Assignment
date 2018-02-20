@@ -12,6 +12,7 @@ public class QueryParameter {
     private ArrayList<String> groups;
     private ArrayList<String> orders;
     private ArrayList<String> logicalOps;
+    private String fileName;
     private String query;
 
     public QueryParameter() {
@@ -38,6 +39,22 @@ public class QueryParameter {
         return query.split("\\s");
     }
 
+    public void setFileName() {
+    	Pattern pattern = Pattern.compile("[a-zA-Z0-9]+\\.(csv)|(txt)");
+    	Matcher matcher = pattern.matcher(query);
+    	if (matcher.find())
+		{
+		    this.fileName = matcher.group();
+		}    	
+    }
+    
+    
+    
+    public String getFileName() {
+    	return this.fileName;
+    }
+    
+    
     public ArrayList<String> getBase(String point){
         String sub = query.substring(0,query.toUpperCase().indexOf(point.toUpperCase()));
         String[] base = sub.split("\\s");
@@ -58,13 +75,19 @@ public class QueryParameter {
 
 
 	public ArrayList<String> getConditions() {
+
 		String sub = query.substring(query.toLowerCase().indexOf("where")+6,query.length());
-		Pattern pattern = Pattern.compile("(\\w+[ ]?)(<>|>=|<=|>|<|=|like|in|not like|not in|(between?\\d[ ]?and\\d))([ ]?['(]?\\w+[')]?)");
+		Pattern pattern = Pattern.compile("(\\w+[ ]?)(<>|>=|<=|>|<|=|like|in|not like|not in|(between?\\d[ ]?and\\d))([ ]?['(]?\\w+[ ]?\\w?[')]?)");
 		Matcher matcher = pattern.matcher(sub);
 		while (matcher.find())
 		{
-			this.conditions.add(matcher.group());
-			System.out.println("Here:"+matcher.group());
+			String str = matcher.group();
+			Character c = str.charAt(str.length()-2);
+			if(c.compareTo(' ') == 0)
+				this.conditions.add(str.substring(0, str.length()-2));
+			else
+				this.conditions.add(str.substring(0,str.length()));
+			//			System.out.println("Here:"+matcher.group());
 		}
 		return this.conditions;
 	}

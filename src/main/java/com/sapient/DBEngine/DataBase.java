@@ -23,6 +23,35 @@ public class DataBase {
         this.csvFile = csvFile;
     }
 
+    
+    public void readFileHeader(){
+        // System.out.println("\n**************reading header of file");
+        BufferedReader br = null;
+        String row = "";
+
+        try {
+            br = new BufferedReader(new FileReader(csvFile));
+            while ((row = br.readLine()) != null) {
+            	this.headers = row.split(",");
+               break;
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+    
+    
     public void getHeaderType(){
         System.out.println("\nGetting type of header\n\n");
         BufferedReader br = null;
@@ -72,70 +101,72 @@ public class DataBase {
         }
     }
 
+    
+    public void executeQuery(QueryParameter query) {
+    	Integer count = 1;
+        StringBuilder stringbuilder = new StringBuilder();
+        stringbuilder.append("temp0.csv");
+        String fileName = stringbuilder.toString();
+        
+        for(String logicalOp: query.getLogicalOp()) {
+        	if(logicalOp.equals("and"))
+        		this.csvFile = "temp.csv";
+        	else 
+        		this.csvFile = query.getFileName();    		
+    	}
 
-    public void readFileHeader(){
-        // System.out.println("\n**************reading header of file");
-        BufferedReader br = null;
-        String row = "";
-
+    	for(String condition: query.getConditions()) {
+        	executeQuery(condition, fileName);
+        	stringbuilder.replace(4, 5, count.toString());
+        	count++;
+    	}
+    	count--;
         try {
-            br = new BufferedReader(new FileReader(csvFile));
-            while ((row = br.readLine()) != null) {
-               this.headers = row.split(",");
-               break;
-            }
-
-            // for(String sub: headers){
-            //     System.out.println(sub);
-            // }
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        	//delete temp file
+        	for(String condition: query.getConditions()) {
+            	stringbuilder.replace(4, 5, count.toString());        	
+            	Path path = Paths.get(stringbuilder.toString());
+            	Files.delete(path);
+            	count--;
+        	}
+        	// close resources
+		} catch (IOException e) {
+			System.out.println(e);
+		}
+        
     }
 
-
-    public void executeQuery(QueryParameter query){
+    public void executeQuery(String condition, String fileName){
+    	// TODO append in temp file and not overwrite
+    	
         ArrayList<String> fields = new ArrayList<String>();
         FileWriter fw = null;
         // declaring two variables for storing locations and positions of fields in csv file
         int loc = 0;
         int pos = 0;
-        fields = query.getFields();
-        
+//        fields = query.getFields();
+  
         
         try{    
-            fw=new FileWriter("temp.csv");
-//            fw.close();    
+            fw=new FileWriter(fileName);
            }catch(Exception e){
         	   System.out.println(e);
            }    
-        
-        // store the positions of fields that user wants from select query
-        int[] targetField = new int[fields.size()];
-        // match required fields with header from csv to get location of each field
-        for(String field:fields){
-            pos = 0;
-            for(String header:this.headers){
-                if(field.equals(header))
-                    targetField[loc++] = pos;
-                pos++;
-            }
-        }
+//        
+//        // store the positions of fields that user wants from select query
+//        int[] targetField = new int[fields.size()];
+//        // match required fields with header from csv to get location of each field
+//        for(String field:fields){
+//            pos = 0;
+//            for(String header:this.headers){
+//                if(field.equals(header))
+//                    targetField[loc++] = pos;
+//                pos++;
+//            }
+//        }
 
         // get conditions in query
-        for(String condition: query.getConditions()){
-        	
+       	System.out.println("Condition----------------"+condition);
         	
         	
         	// check if condition is checking for less than or equal to
@@ -418,17 +449,14 @@ public class DataBase {
 	                    }
 	                }
 	            }
-        	}       	        	
+        	}       	
         	
-        }
-        try {
-        	//delete temp file
-        	Path path = Paths.get("temp.csv");
-        	Files.delete(path);
-        	// close resources
-        	fw.close();
-		} catch (IOException e) {
-			System.out.println(e);
-		}    
+        	try {
+				fw.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        	
     }
 }
