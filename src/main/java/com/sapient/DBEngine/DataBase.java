@@ -103,48 +103,133 @@ public class DataBase {
 
     
     public void executeQuery(QueryParameter query) {
+    	int pos = 0;
+        int flag = 0;
+        int loc = 0;
     	Integer count = 1;
-        StringBuilder stringbuilder = new StringBuilder();
+
+        ArrayList<String> logicalOp = query.getLogicalOp();
+        ArrayList<String> fields = query.getFields();
+        int[] locations = new int[fields.size()];
+
+        BufferedReader br = null;
+        
+    	StringBuilder stringbuilder = new StringBuilder();
         stringbuilder.append("temp0.csv");
         String fileName = stringbuilder.toString();
-        
-        for(String logicalOp: query.getLogicalOp()) {
-        	if(logicalOp.equals("and"))
-        		this.csvFile = "temp.csv";
-        	else 
-        		this.csvFile = query.getFileName();    		
-    	}
 
-    	for(String condition: query.getConditions()) {
-        	executeQuery(condition, fileName);
-        	stringbuilder.replace(4, 5, count.toString());
-        	count++;
-    	}
-    	count--;
-        try {
-        	//delete temp file
-        	for(String condition: query.getConditions()) {
+        for(String condition: query.getConditions()) {
+    		executeQuery(condition, fileName);
+    		if(flag == 1) {
+            	count = count-2;
             	stringbuilder.replace(4, 5, count.toString());        	
+    			Path path = Paths.get(stringbuilder.toString());
+
+    			try {
+					Files.delete(path);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+    			flag = 0;
+    		}
+    		if(pos < logicalOp.size()) {
+    			if(logicalOp.get(pos).equals(" or ")) {
+            		this.csvFile = query.getFileName();
+            		pos++;
+        		}
+            	else if(logicalOp.get(pos).equals(" and ")) {
+            		this.csvFile = fileName;
+            		pos++;
+            		flag = 1;
+            	}
+    			
+    		}
+   	        count++;      			
+   	        stringbuilder.replace(4, 5, count.toString());
+   	        fileName = stringbuilder.toString();
+        }
+        
+        try {
+        	String row;
+       	  	FileWriter fw = new FileWriter("temp.csv");
+        	br = null;
+        	for(String condition: query.getConditions()) {
+            	stringbuilder.replace(4, 5, count.toString());     
             	Path path = Paths.get(stringbuilder.toString());
+            	try {
+                	br = new BufferedReader(new FileReader(stringbuilder.toString()));            		
+            	} catch(FileNotFoundException e) {
+            		count--;
+            		continue;           		
+            	}
+            	while ((row = br.readLine()) != null) {
+            		fw.write(row+"\n");
+            	}
             	Files.delete(path);
             	count--;
+            	if(count <= 0) {
+            		break;
+            	}
         	}
         	// close resources
-		} catch (IOException e) {
+        	fw.close();
+        } catch (IOException e) {
 			System.out.println(e);
 		}
+
+        loc = 0;
+        pos = 0;
+
+        for(String header:headers) {
+        	if(pos == fields.size())
+        		break;
+        	if(fields.get(pos).equals(header)) {
+        		locations[loc] = pos;
+            	loc++;
+            	pos++;
+        	}
+        }
         
+        try {
+        	pos = 0;
+        	loc = 0;
+        	String row;  	
+        	br = new BufferedReader(new FileReader("temp.csv"));
+        	while ((row = br.readLine()) != null) {
+    			stringbuilder.delete(0, stringbuilder.length());
+        		String[] field = row.split(",");
+        		for(String fld: field) {
+        			if(loc == fields.size())
+        				break;
+        			if(pos == locations[loc]) {
+        				stringbuilder.append(fld+",");
+        				loc++;
+        			}
+        			pos++;
+        		}
+        		stringbuilder.delete(stringbuilder.length()-1, stringbuilder.length());
+        		System.out.println(stringbuilder+"\n");
+        		pos = 0;
+        		loc = 0;
+        	}        
+        } catch (IOException e) {
+			System.out.println(e);
+		} finally {
+			try {
+				br.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
     }
 
-    public void executeQuery(String condition, String fileName){
-    	// TODO append in temp file and not overwrite
-    	
-        ArrayList<String> fields = new ArrayList<String>();
-        FileWriter fw = null;
-        // declaring two variables for storing locations and positions of fields in csv file
+    
+    public void executeQuery(String condition, String fileName){    	
+    	FileWriter fw = null;
+
+    	// declaring two variables for storing locations and positions of fields in csv file
         int loc = 0;
         int pos = 0;
-//        fields = query.getFields();
   
         
         try{    
@@ -152,22 +237,7 @@ public class DataBase {
            }catch(Exception e){
         	   System.out.println(e);
            }    
-//        
-//        // store the positions of fields that user wants from select query
-//        int[] targetField = new int[fields.size()];
-//        // match required fields with header from csv to get location of each field
-//        for(String field:fields){
-//            pos = 0;
-//            for(String header:this.headers){
-//                if(field.equals(header))
-//                    targetField[loc++] = pos;
-//                pos++;
-//            }
-//        }
-
-        // get conditions in query
-       	System.out.println("Condition----------------"+condition);
-        	
+   	
         	
         	// check if condition is checking for less than or equal to
         	if(condition.contains("<=")){
@@ -198,8 +268,6 @@ public class DataBase {
 	                     if(pos == loc){
 	                    	 try {
 		                    	 if(Integer.parseInt(val) <= value){
-				                       fw.write(row+"\n");
-		 	                           System.out.println(row+"\n");
 			                           pos = 0;
 			                     }	                    		 
 	                    	 }
@@ -256,7 +324,6 @@ public class DataBase {
 	                    	 try {
 	                    		 if(Integer.parseInt(val) >= value){
 	  		                       fw.write(row+"\n");
-	   	                           System.out.println(row+"\n");
 	  	                           pos = 0;
 	  	                         }	 
 	                    	 }
@@ -313,7 +380,6 @@ public class DataBase {
 	                     if(pos == loc){
 	                         if(val.equals(value)){
 	                           fw.write(row+"\n");
-	                           System.out.println(row+"\n");
 	                           pos = 0;
 	                         }
                            break;
@@ -366,7 +432,6 @@ public class DataBase {
 	                    	 try {
 		                         if(Integer.parseInt(val) < value){
 				                       fw.write(row+"\n");
-		                        	   System.out.println(row+"\n");
 			                           pos = 0;
 			                         } 
 	                    	 }
@@ -423,7 +488,6 @@ public class DataBase {
 	                    	 try {
 		                         if(Integer.parseInt(val) > value){
 				                       fw.write(row+"\n");
-		 	                           System.out.println(row+"\n");
 			                           pos = 0;	                    		 
 		                         }
 	                    	 }

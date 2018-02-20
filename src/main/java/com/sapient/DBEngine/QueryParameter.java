@@ -89,21 +89,15 @@ public class QueryParameter {
 				this.conditions.add(str.substring(0,str.length()));
 			//			System.out.println("Here:"+matcher.group());
 		}
-		return this.conditions;
+		return this.conditions;		
 	}
 
     public ArrayList<String> getLogicalOp(){
-        if(query.contains("and")){
-            this.logicalOps.add("and");
-        }
-
-        if(query.contains("or")){
-        	this.logicalOps.add("or");
-        }
-
-        if(query.contains("not")){
-        	this.logicalOps.add("not");
-        }
+    	Pattern p3 = Pattern.compile("( and )|( or )|( not )");
+		Matcher m3 = p3.matcher(query.substring(query.indexOf("where")+5, query.length()-1));
+		while (m3.find()) {
+			this.logicalOps.add(m3.group());
+		}		
         return this.logicalOps;
     }
 
