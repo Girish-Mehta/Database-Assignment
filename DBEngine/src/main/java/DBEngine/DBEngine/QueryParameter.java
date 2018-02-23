@@ -6,31 +6,42 @@ import java.util.regex.Pattern;
 
 public class QueryParameter {
 	// variable to store query
-	private String query = null;
-	// variable to store file name 
-	private String fileName = null;
+	private String query;
+	// variable to store file name
+	private String fileName;
 	// variable to store string after 'where'
 	private String filter = null;
 	// variable to store string before 'where'
 	private String base = null;
 	// List to store conditions in query
-	private ArrayList<String> conditions =  new ArrayList<String>();
+	private ArrayList<String> conditions;
 	// list to store required fields in query
-	private ArrayList<String> fields =  new ArrayList<String>();
-	// list to store functions like 'min()' 'max()' 'avg()' 'sum()' 
-	private ArrayList<String> functions = new ArrayList<String>();
+	private ArrayList<String> fields;
+	// list to store functions like 'min()' 'max()' 'avg()' 'sum()'
+	private ArrayList<String> functions;
 	// list to store group by from query
-	private ArrayList<String> groups =  new ArrayList<String>();
+	private ArrayList<String> groups;
 	// list to store operators like 'or' 'and'
-	private ArrayList<String> operators =  new ArrayList<String>();
+	private ArrayList<String> operators;
 	// variable to store order by from query
-	private ArrayList<String> order =  new ArrayList<String>();
+	private ArrayList<String> order;
 
 	// Default Constructor
-	QueryParameter(){}
-	
+	QueryParameter(){
+		this.base = "";
+		this.conditions = new ArrayList<String>();
+		this.fields = new ArrayList<String>();
+		this.fileName = "";
+		this.filter = "";
+		this.functions = new ArrayList<String>();
+		this.groups = new ArrayList<String>();
+		this.operators = new ArrayList<String>();
+		this.order = new ArrayList<String>();
+	}
+
 	// Parameterized constructor to initialize variables form query
 	QueryParameter(String query){
+		this();
 		this.query = query;
 		setFileName();
 		setBase();
@@ -98,7 +109,7 @@ public class QueryParameter {
 
 	public void setFields() {
 		// functions usually lie between 'select' and 'from'
-		
+
 		// save starting position to pull out sub string from query
 		// size of 'select' + 1 = 7
 		int startPos = 7;
@@ -110,7 +121,7 @@ public class QueryParameter {
         for(String str: field) {
         	// if field does not contain a function then save in variable
         	if(!(str.contains("(") && str.contains(")"))){
-               	this.fields.add(str);       		
+               	this.fields.add(str);
         	}
         }
 	}
@@ -226,7 +237,7 @@ public class QueryParameter {
        if(!(subString.toString().equals(" ") || subString.toString().equals(""))) {
            String[] fnc = subString.toString().split("\n");
            for(String str: fnc)
-        	   this.functions.add(str);    	   
+        	   this.functions.add(str);
        }
 	}
 
@@ -270,7 +281,7 @@ public class QueryParameter {
 		Matcher m3 = p3.matcher(query.substring(query.indexOf("where")+5, query.length()-1));
 		while (m3.find()) {
 			this.operators.add(m3.group());
-		}		
+		}
 	}
 
 	public ArrayList<String> getOrder() {
@@ -301,5 +312,5 @@ public class QueryParameter {
             for(String str: orders)
             	this.order.add(str);
         }
-	}	
+	}
 }
