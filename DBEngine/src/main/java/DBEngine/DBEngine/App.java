@@ -8,7 +8,7 @@ public class App
 {
     public static void main( String[] args )
     {
-      String query = "Select *,min(city) from ipl.csv where city = Bangalore or id = 5 group by name";
+      String query = "Select * from ipl.csv where city = Chandigarh group by city";
     	QueryParameter queryParameter = new QueryParameter(query);
     	DataBaseManager baseManager = new DataBaseManager();
       try{
@@ -18,6 +18,7 @@ public class App
       		System.out.println("Failed");
       } catch(Exception e){
         System.out.println(e.toString());
+        e.printStackTrace();
       }
     }
 

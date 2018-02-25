@@ -7,6 +7,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 
+import javax.tools.DocumentationTool.Location;
+
 public class DataBaseManager {
 
 	private ArrayList<String> data;
@@ -56,32 +58,35 @@ public class DataBaseManager {
 			sortData(field);
 		}
 		
+		// TODO code for 'and' 'or'
+		
 		// filter result
 		for(String condition: queryParameter.getConditions()) {
-			if(condition.contains("<=")) {
-				paramvalue = condition.split("<=");
+			if(condition.contains(" <= ")) {
+				paramvalue = condition.split(" <= ");
 				parameter = paramvalue[0]; 
 				value = paramvalue[1];
 				processCondition(parameter, value, "<=");			
-			} else if(condition.contains(">=")) {
-				paramvalue = condition.split(">=");
+			} else if(condition.contains(" >= ")) {
+				paramvalue = condition.split(" >= ");
 				parameter = paramvalue[0]; 
 				value = paramvalue[1];
 				processCondition(parameter, value, ">=");				
-			} else if(condition.contains("<")) {
-				paramvalue = condition.split("<");
+			} else if(condition.contains(" < ")) {
+				paramvalue = condition.split(" < ");
 				parameter = paramvalue[0]; 
 				value = paramvalue[1];
 				processCondition(parameter, value, "<");				
-			} else if(condition.contains(">")) {
-				paramvalue = condition.split(">");
+			} else if(condition.contains(" > ")) {
+				paramvalue = condition.split(" > ");
 				parameter = paramvalue[0]; 
 				value = paramvalue[1];
 				processCondition(parameter, value, ">");				
-			} else if(condition.contains("=")) {
-				paramvalue = condition.split("=");
+			} else if(condition.contains(" = ")) {
+				paramvalue = condition.split(" = ");
 				parameter = paramvalue[0]; 
 				value = paramvalue[1];
+				//System.out.println(value+" bjfsdhghjkjklhghgfgsfgxf");
 				processCondition(parameter, value, "=");				
 			} 
 			
@@ -113,10 +118,15 @@ public class DataBaseManager {
 		filterFields(queryParameter.getFields());
 		
 		// load the output in JSON file
-		try{
-			loadOutput();
-		} catch(Exception e) {
-			throw e;
+//		try{
+//			loadOutput();
+//		} catch(Exception e) {
+//			throw e;
+//		}
+		
+		
+		for(String res: this.result) {
+			System.out.println(res);
 		}
 		
 		return true;
@@ -190,15 +200,20 @@ public class DataBaseManager {
 			
 				return cols1[pos].compareToIgnoreCase(cols2[pos]);
 			}
-		});;
+		});
 	
 	}
 	
 	private void processCondition(String param, String val, String op) {
 		// variable to store the value to be checked with
-		int value = Integer.parseInt(val);
+		int value = 0;
+		try{
+			value = Integer.parseInt(val);
+		} catch(Exception e) {
+			
+		}
 		// list to store row location to remove from the result list
-		ArrayList<Integer> locations = new ArrayList<Integer>();
+		ArrayList<String> locations = new ArrayList<String>(this.data.size());
 		// variables to store positions
 		int pos = 0;
 		int loc = 0;
@@ -209,7 +224,6 @@ public class DataBaseManager {
 				break;
 			pos++;
 		}
-		
 		switch(op) {
 		case "<=":
 			// evaluate the condition for required column in every row
@@ -217,7 +231,7 @@ public class DataBaseManager {
 				String[] cols = row.split(",");
 				// if condition is not met then add the row to the deletion list
 				if(!(Integer.parseInt(cols[pos]) <= value))
-					locations.add(loc);
+					locations.add(row);
 				loc++;
 			}
 			break;
@@ -227,7 +241,7 @@ public class DataBaseManager {
 				String[] cols = row.split(",");
 				// if condition is not met then add the row to the deletion list
 				if(!(Integer.parseInt(cols[pos]) >= value))
-					locations.add(loc);
+					locations.add(row);
 				loc++;
 			}
 			break;
@@ -237,7 +251,7 @@ public class DataBaseManager {
 				String[] cols = row.split(",");
 				// if condition is not met then add the row to the deletion list
 				if(!(Integer.parseInt(cols[pos]) < value))
-					locations.add(loc);
+					locations.add(row);
 				loc++;
 			}
 			break;
@@ -247,7 +261,7 @@ public class DataBaseManager {
 				String[] cols = row.split(",");
 				// if condition is not met then add the row to the deletion list
 				if(!(Integer.parseInt(cols[pos]) > value))
-					locations.add(loc);
+					locations.add(row);
 				loc++;
 			}
 			break;
@@ -256,18 +270,18 @@ public class DataBaseManager {
 			for(String row: this.data) {
 				String[] cols = row.split(",");
 				// if condition is not met then add the row to the deletion list
-				if(!(cols[pos].equals(val)))
-					locations.add(loc);
+				if(!(cols[pos].equals(val))) {
+					locations.add(row);
+				}
 				loc++;
 			}
 			break;
 		default: break;
 		}		
-
+		
 		// remove the rows that did not meet the condition
-		for(int position: locations) {
-			this.data.remove(position);
-		}
+		this.data.removeAll(locations);
+
 	}
 	
 	private void filterFields(ArrayList<String> columns) {
@@ -276,9 +290,15 @@ public class DataBaseManager {
 		// variable to generate comma separated rows of required fields
 		StringBuilder stringBuilder = new StringBuilder();
 		
-		for(String column: columns) {
-			pos.add(this.fields.indexOf(column));
-			this.header.add(column);
+		if(columns.get(0).equals("*")) {
+			this.header = this.fields;
+			for(int looper = 0; looper < this.fields.size(); looper++)
+				pos.add(looper);
+		} else {
+			for(String column: columns) {
+				pos.add(this.fields.indexOf(column));
+				this.header.add(column);				
+			}			
 		}
 
 		// for every row
@@ -291,9 +311,11 @@ public class DataBaseManager {
 				stringBuilder.append(cols[loc]+",");
 			}
 			// remove the comma at the end
-			stringBuilder.delete(stringBuilder.length()-1, stringBuilder.length());
+			stringBuilder.delete(stringBuilder.length(), stringBuilder.length());
 			//save the row in the result array list
 			this.result.add(stringBuilder.toString());
+			// reset stringbuilder value
+			stringBuilder.delete(0, stringBuilder.length());
 		}
 	}
 	

@@ -8,11 +8,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 //import org.json.simple.JSONArray;
 //import org.json.simple.JSONObject;
+import java.util.Iterator;
+
+import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 
 public class FileManager {
   private BufferedReader bufferedReader;
   private ArrayList<String> colList;
-  private String fileName;
+  private static String fileName;
   private FileReader fileReader;
   private FileWriter fileWriter;
   private ArrayList<String> rows;
@@ -20,7 +23,6 @@ public class FileManager {
   FileManager(){
     this.bufferedReader = null;
     this.colList = new ArrayList<String>();
-    this.fileName = "";
     this.fileReader = null;
     this.fileWriter = null;
     this.rows = new ArrayList<String>();
@@ -30,19 +32,11 @@ public class FileManager {
     try{
       // check if file exists
       fileReader = new FileReader(fileName);
-      this.fileName = fileName;
+      FileManager.fileName = fileName;
     } catch(FileNotFoundException e){
       // throw exception if file does not exist
       throw e;
-    } finally{
-      // close resource
-      try {
-		fileReader.close();
-	} catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-    }
+    } 
   }
 
   public ArrayList<String> getFirstRow() throws FileNotFoundException{
@@ -50,7 +44,7 @@ public class FileManager {
     String row = "";
     try{
       // load file
-      fileReader = new FileReader(fileName);
+      fileReader = new FileReader(FileManager.fileName);
       // initialize buffer reader to read lines
       bufferedReader = new BufferedReader(fileReader);
         while((row = bufferedReader.readLine()) != null){
@@ -67,15 +61,7 @@ public class FileManager {
       } catch (IOException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
-	} finally{
-          // close resource
-          try {
-			fileReader.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-      }
+      } 
 	return colList;
   }
 
@@ -83,13 +69,14 @@ public class FileManager {
   public ArrayList<String> getRows(){
 	    String row = "";
 	    try{
-	      // load file
-	      fileReader = new FileReader(fileName);
+		  // load file
+	      fileReader = new FileReader(FileManager.fileName);
 	      // initialize buffer reader to read lines
 	      bufferedReader = new BufferedReader(fileReader);
-	        while((row = bufferedReader.readLine()) != null){
+	      String temp = bufferedReader.readLine();
+	      	while((row = bufferedReader.readLine()) != null){
 	            // add every row to list
-	            rows.add(row);
+	        	rows.add(row);
 	        }
 	      } catch(FileNotFoundException e){
 	    	  // TODO Auto-generated catch block
@@ -97,16 +84,9 @@ public class FileManager {
 	      } catch (IOException e) {
 	    	  // TODO Auto-generated catch block
 	    	  e.printStackTrace();
-		} finally{
-	          // close resource
-	          try {
-				fileReader.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	      }
-		return colList;
+		} 
+	    
+		return rows;
 	  }
   
   
