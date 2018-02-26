@@ -8,7 +8,7 @@ public class App
 {
     public static void main( String[] args )
     {
-      String query = "Select * from ipl.csv where city = Chandigarh group by city";
+      String query = "Select * from ipl.csv where city = Chandigarh";
     	QueryParameter queryParameter = new QueryParameter(query);
     	DataBaseManager baseManager = new DataBaseManager();
       try{
