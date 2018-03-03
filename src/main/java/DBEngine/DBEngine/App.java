@@ -1,5 +1,7 @@
 package DBEngine.DBEngine;
 
+import java.util.ArrayList;
+
 /**
  * Author: Girish Mehta
  *
@@ -8,7 +10,7 @@ public class App
 {
     public static void main( String[] args )
     {
-      String query = "Select * from ipl.csv where city = Chandigarh";
+      String query = "Select * from ipl.csv where city = Chandigarh or id < 5";
     	QueryParameter queryParameter = new QueryParameter(query);
     	DataBaseManager baseManager = new DataBaseManager();
       try{
@@ -21,7 +23,6 @@ public class App
         e.printStackTrace();
       }
     }
-
 }
 
 

@@ -87,16 +87,16 @@ public class QueryParameter {
 		// as conditions come after 'where'
 		String sub = query.substring(query.toLowerCase().indexOf("where")+6,query.length());
 		// match with pattern
-		Pattern pattern = Pattern.compile("(\\w+[ ]?)(<>|>=|<=|>|<|=|like|in|not like|not in|(between?\\d[ ]?and\\d))([ ]?['(]?\\w+[ ]?\\w?[')]?)");
+		Pattern pattern = Pattern.compile("(\\w+[ ]?)(<>|>=|<=|>|<|=|like|in|not like|not in|(between?\\d[ ]?and\\d))(([ ]?\\w+)|([\'|(]?\\w+[ ]?\\w+[\'|)]?))");
 		Matcher matcher = pattern.matcher(sub);
 		while (matcher.find())
 		{
 			// if condition found then store in string
 			String str = matcher.group();
-			Character c = str.charAt(str.length()-2);
+			Character c = str.charAt(str.length()-1);
 			// if condition contains extra spacing then remove
 			if(c.compareTo(' ') == 0)
-				this.conditions.add(str.substring(0, str.length()-2));
+				this.conditions.add(str.substring(0, str.length()-1));
 			// else save the condition
 			else
 				this.conditions.add(str);

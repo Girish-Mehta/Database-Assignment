@@ -36,7 +36,7 @@ public class FileManager {
     } catch(FileNotFoundException e){
       // throw exception if file does not exist
       throw e;
-    }
+    } 
   }
 
   public ArrayList<String> getFirstRow() throws FileNotFoundException{
@@ -61,11 +61,11 @@ public class FileManager {
       } catch (IOException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
-      }
+      } 
 	return colList;
   }
 
-
+  
   public ArrayList<String> getRows(){
 	    String row = "";
 	    try{
@@ -84,45 +84,47 @@ public class FileManager {
 	      } catch (IOException e) {
 	    	  // TODO Auto-generated catch block
 	    	  e.printStackTrace();
-		}
-
+		} 
+	    
 		return rows;
 	  }
+  
+  
+  	public void createJSON(ArrayList<String> result, ArrayList<String> fields) throws Exception{
+  		int pos = 0;
+  		// create a json object
+  		JSONObject obj = new JSONObject();
+  		// create a json array for every row
+  		JSONArray rows = new JSONArray();
+  		// create a json object for every column
+  		JSONObject row = new JSONObject();
 
-
- 	public void createJSON(ArrayList<String> result, ArrayList<String> fields) throws Exception{
- 		int pos = 0;
- 		// create a json object
- 		JSONObject obj = new JSONObject();
- 		// create a json array for every row
- 		JSONArray rows = new JSONArray();
- 		// create a json object for every column
- 		JSONObject row = new JSONObject();
-
- 		// for every row in result
- 		for(String line: result) {
- 			pos = 0;
- 			// get every column and put in json
- 			while(pos < fields.size()) {
- 	  			row.put(fields.get(pos), result.get(pos));
- 	  			pos++;
- 	  		}
- 			// add that row to json
- 			rows.add(row);
- 		}
- 		// add the rows to json
- 		obj.put("Output",rows);
-
- 		try {
- 			// create json file and write in it
- 			fileWriter = new FileWriter("output.json");
- 			fileWriter.write(obj.toJSONString());
- 	  		fileWriter.flush();
- 		} catch(IOException e) {
- 			throw e;
- 		} finally {
- 			// close resource
- 			fileWriter.close();
- 		}
- 	}
+  		// for every row in result
+  		for(String line: result) {
+  			row = new JSONObject();
+  			pos = 0;
+  			String[] cols = line.split(",");
+  			// get every column and put in json
+  			while(pos < fields.size()) {
+  	  			row.put(fields.get(pos), cols[pos]);
+  	  			pos++;
+  	  		}
+  			// add that row to json
+  			rows.add(row);
+  		}
+  		// add the rows to json
+  		obj.put("Output",rows);
+  		
+  		try {
+  			// create json file and write in it
+  			fileWriter = new FileWriter("output.json");
+  			fileWriter.write(obj.toJSONString());
+  	  		fileWriter.flush();
+  		} catch(IOException e) {
+  			throw e;
+  		} finally {
+  			// close resource
+  			fileWriter.close();
+  		}
+  	}
 }
